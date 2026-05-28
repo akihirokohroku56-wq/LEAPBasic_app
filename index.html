@@ -708,11 +708,75 @@ const DB = [["Part1","冠詞・代名詞",1,"a","A1","[冠] ①ある（ 1 つ�
 
 // ── Constants ───────────────────────────────────────────────────
 const CIRCLES = "①②③④⑤⑥";
-const STOP = new Set(["the","a","an","of","to","in","on","for","at","by","with",
-  "his","her","its","our","my","your","their","this","that","these","those",
-  "there","here","and","or","but","not","is","are","was","were","be","been",
-  "do","did","have","has","had","will","would","can","could","may","might",
-  "shall","should","must","you","he","she","it","we","they","i","me","us","him","them"]);
+const STOP = new Set([
+  "the","a","an","of","to","in","on","for","at","by","with","from","into",
+  "onto","upon","about","above","across","after","against","along","among",
+  "around","before","behind","below","beneath","beside","between","beyond",
+  "down","during","except","inside","near","off","out","outside","over",
+  "past","since","through","throughout","under","until","up","within","without",
+  "and","or","but","nor","so","yet","both","either","neither","whether",
+  "if","when","while","as","than","although","though","because",
+  "which","who","whom","whose","that",
+  "i","me","my","myself","we","us","our","ours","ourselves",
+  "you","your","yours","yourself","yourselves",
+  "he","him","his","himself","she","her","hers","herself",
+  "it","its","itself","they","them","their","theirs","themselves",
+  "this","those","these","here","there","where",
+  "is","am","are","was","were","be","been","being",
+  "do","does","did","have","has","had","having",
+  "will","would","shall","should","may","might","must","can","could",
+  "not","no","never","always","often","sometimes","already","still","just",
+  "all","some","any","each","every","few","many","much","more","most","other",
+  "what","how","why","very","too","also","even","only","such","own","same",
+  "fully","stop","several","lot","little","great","big","small","new","old",
+  "long","high","low","first","last","next",
+  "recently","immediately","finally","suddenly","gradually","deeply","highly",
+  "strongly","clearly","easily","quickly","slowly","early","late",
+  "feel","become","seem","look","get","make","take","put","keep","turn"
+]);
+const IRREG = {
+  "be":["am","is","are","was","were","been"],
+  "have":["has","had"],"do":["does","did","done"],
+  "go":["goes","went","gone"],"come":["came"],"get":["got","gotten"],
+  "take":["took","taken"],"give":["gave","given"],"make":["made"],
+  "see":["saw","seen"],"know":["knew","known"],"say":["said"],
+  "tell":["told"],"find":["found"],"think":["thought"],
+  "leave":["left"],"bring":["brought"],"keep":["kept"],
+  "hold":["held"],"stand":["stood"],"understand":["understood"],
+  "become":["became"],"begin":["began","begun"],
+  "break":["broke","broken"],"build":["built"],
+  "buy":["bought"],"catch":["caught"],"choose":["chose","chosen"],
+  "cut":["cut"],"draw":["drew","drawn"],"drive":["drove","driven"],
+  "eat":["ate","eaten"],"fall":["fell","fallen"],"feel":["felt"],
+  "fight":["fought"],"fly":["flew","flown"],"forget":["forgot","forgotten"],
+  "freeze":["froze","frozen"],"grow":["grew","grown"],
+  "hear":["heard"],"hide":["hid","hidden"],"hit":["hit"],
+  "hurt":["hurt"],"lay":["laid"],"lead":["led"],
+  "learn":["learnt","learned"],"let":["let"],"lose":["lost"],
+  "mean":["meant"],"meet":["met"],"pay":["paid"],"put":["put"],
+  "read":["read"],"ride":["rode","ridden"],"ring":["rang","rung"],
+  "rise":["rose","risen"],"run":["ran"],"sell":["sold"],
+  "send":["sent"],"set":["set"],"shake":["shook","shaken"],
+  "show":["showed","shown"],"shut":["shut"],"sing":["sang","sung"],
+  "sit":["sat"],"sleep":["slept"],"speak":["spoke","spoken"],
+  "spend":["spent"],"spread":["spread"],"steal":["stole","stolen"],
+  "swim":["swam","swum"],"teach":["taught"],"throw":["threw","thrown"],
+  "wake":["woke","woken"],"wear":["wore","worn"],"win":["won"],
+  "write":["wrote","written"],"arise":["arose","arisen"],
+  "bear":["bore","borne"],"bend":["bent"],"bind":["bound"],
+  "bite":["bit","bitten"],"blow":["blew","blown"],"breed":["bred"],
+  "seek":["sought"],"weep":["wept"],"withdraw":["withdrew","withdrawn"],
+  "leap":["leapt","leaped"],"shrink":["shrank","shrunk"],
+  "sink":["sank","sunk"],"slide":["slid"],"spring":["sprang","sprung"],
+  "swear":["swore","sworn"],"sweep":["swept"],"swing":["swung"],
+  "shed":["shed"],"strike":["struck"],
+  "phenomenon":["phenomena"],"medium":["media"],"criterion":["criteria"],
+  "datum":["data"],"analysis":["analyses"],"basis":["bases"],
+  "crisis":["crises"],"hypothesis":["hypotheses"]
+};
+
+function stripAccents(s){return s.normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
+
 
 // ── Question pool ───────────────────────────────────────────────
 // DB format: [sheet, group, num, word, cefr, meaning, ex_en, ex_ja]
@@ -873,23 +937,73 @@ function cleanAns(raw) {
 }
 
 function findUL(base, sentence) {
-  function esc(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
-  let m = sentence.match(new RegExp("\\b" + esc(base) + "\\b", "i"));
-  if (m) return [sentence.slice(0, m.index), m[0], sentence.slice(m.index + m[0].length)];
-  m = sentence.match(new RegExp("\\b" + esc(base) + "\\w*\\b", "i"));
-  if (m) return [sentence.slice(0, m.index), m[0], sentence.slice(m.index + m[0].length)];
-  const bf = base.split(" ")[0].replace(/[^a-zA-Z]/g, "");
-  if (bf) {
-    m = sentence.match(new RegExp("\\b" + esc(bf) + "\\w*\\b", "i"));
-    if (m) return [sentence.slice(0, m.index), m[0], sentence.slice(m.index + m[0].length)];
+  if (!sentence || /^[―\-—]+$/.test(sentence.trim())) return ["", sentence || "", ""];
+  base = base.replace(/[,.!?×\[\]]/g, "").trim();
+  if (!base) return ["", sentence, ""];
+
+  let clean = stripAccents(sentence);
+  clean = clean.replace(/（[^）]*）/g, " ").replace(/\[[^\]]*\]/g, " ");
+  clean = clean.replace(/[×＊]\w+/g, " ");
+
+  function esc(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+  function hit(pattern, src){
+    const m = src.match(new RegExp("\\b" + pattern + "\\b", "i"));
+    if (!m) return null;
+    // 元の sentence から同位置の文字列を返す
+    const ci = sentence.search(new RegExp("\\b" + pattern + "\\b", "i"));
+    if (ci < 0) return null;
+    const matched = sentence.slice(ci, ci + m[0].length);
+    return [sentence.slice(0, ci), matched, sentence.slice(ci + m[0].length)];
   }
+
+  const e = esc(base);
+  let r;
+
+  // ①完全一致
+  r = hit(e, clean); if (r) return r;
+
+  // ②通常活用（+s/es/ed/ing/er/est/ly/ness/ment/tion/al/ize/ise）
+  r = hit(e + "(?:s|es|ed|ing|er|est|ly|ness|ment|tion|al|ize|ise)?", clean);
+  if (r && r[1]) return r;
+
+  // ③y→ies/ied（vary→varies, luxury→luxuries）
+  if (base.endsWith("y")) {
+    r = hit(esc(base.slice(0,-1)) + "(?:ies|ied|ier)", clean);
+    if (r) return r;
+  }
+
+  // ④e落ち+ing/ed（criticize→criticizing, cope→coping）
+  if (base.endsWith("e") && base.length > 3) {
+    r = hit(esc(base.slice(0,-1)) + "(?:ing|ed|er)", clean);
+    if (r) return r;
+  }
+
+  // ⑤子音重複+ing/ed（nod→nodded, spin→spinning, hug→hugged）
+  const last = base.slice(-1);
+  if (!"aeiou".includes(last)) {
+    r = hit(e + last + "(?:ing|ed|er)", clean);
+    if (r) return r;
+  }
+
+  // ⑥不規則変化辞書
+  const bl = base.toLowerCase();
+  if (IRREG[bl]) {
+    for (const form of IRREG[bl]) {
+      r = hit(esc(form), clean);
+      if (r) return r;
+    }
+  }
+
+  // ⑦フォールバック（拡充ストップワード除外・3文字以上）
   const tokens = sentence.match(/\b[\w']+\b/g) || [];
-  for (let i = 0; i < tokens.length; i++) {
-    const tok = tokens[i];
-    const idx = sentence.indexOf(tok);
-    if (!STOP.has(tok.toLowerCase().replace(/'s$/, "")))
-      return [sentence.slice(0, idx), tok, sentence.slice(idx + tok.length)];
+  for (const tok of tokens) {
+    const w = tok.toLowerCase().replace(/'s$/, "");
+    if (!STOP.has(w) && w.length > 2) {
+      const ci = sentence.indexOf(tok);
+      return [sentence.slice(0, ci), tok, sentence.slice(ci + tok.length)];
+    }
   }
+
   const sp = sentence.indexOf(" ");
   if (sp > 0) return ["", sentence.slice(0, sp), sentence.slice(sp)];
   return ["", sentence, ""];
