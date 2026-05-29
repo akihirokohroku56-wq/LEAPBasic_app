@@ -807,6 +807,8 @@ let QUESTION_POOL = [];
 function expandEntry(entry) {
   const ex_en = entry[6], ex_ja = entry[7];
   const mc = entry[5].replace(/^\[.+?\]\s*/, "").trim();
+  // ① より前にテキストがある場合（例：「（to ～） ①...」）はインデックスがずれるため除去
+  const mcAligned = mc.replace(/^[^①②③④⑤⑥]+(?=[①②③④⑤⑥])/, "").trim();
   const hasC = [...CIRCLES].some(ch => ex_en.includes(ch));
   if (!hasC) {
     const e = ex_en.trim().split("\n")[0].replace(/\s*◇.*$/, "").trim();
@@ -815,7 +817,7 @@ function expandEntry(entry) {
   }
   const re = new RegExp("[" + CIRCLES + "]");
   const pe = ex_en.split(re).map(s => s.trim()).filter(Boolean);
-  const pm = mc.split(re).map(s => s.trim()).filter(Boolean);
+  const pm = mcAligned.split(re).map(s => s.trim()).filter(Boolean);
   const pj = (ex_ja || "").split(re).map(s => s.trim()).filter(Boolean);
   return pe.map((ex, i) => {
     const e = ex.split("\n")[0].replace(/\s*◇.*$/, "").trim();
