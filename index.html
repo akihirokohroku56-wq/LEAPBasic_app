@@ -552,6 +552,44 @@ body {
   .card-scene { height: 230px; }
   .card-sentence { font-size: 1.05rem; }
 }
+
+/* ── サイドバー開閉（スマホ向け） ── */
+.sidebar {
+  transition: width 0.25s ease, min-width 0.25s ease,
+              padding 0.25s ease, opacity 0.25s ease;
+}
+.sidebar.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0;
+  border-right: none !important;
+}
+/* トグルボタン */
+#sidebarToggle {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 16px;
+  z-index: 200;
+  background: var(--orange, #e08030);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+#sidebarToggle:hover { background: var(--orange-dark, #c06020); }
+@media (max-width: 860px) {
+  #sidebarToggle { display: flex; }
+}
 .card-audio-row{display:flex;justify-content:flex-end;margin-top:4px;}
 .audio-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:transparent;border:1px solid var(--orange-dim,#c0a060);border-radius:20px;color:var(--orange-dim,#c0a060);font-size:.75rem;cursor:pointer;transition:background .15s,color .15s;font-family:inherit;}
 .audio-btn:hover{background:var(--orange-dim,#c0a060);color:#fff;}
@@ -1218,6 +1256,15 @@ function escH(s) {
 
 initUI();
 
+
+function toggleSidebar() {
+  const sb  = document.querySelector('.sidebar');
+  const btn = document.getElementById('sidebarToggle');
+  const collapsed = sb.classList.toggle('collapsed');
+  btn.textContent = collapsed ? '⚙' : '☰';
+  btn.title = collapsed ? '設定パネルを表示' : '設定パネルを隠す';
+}
 </script>
+<button id="sidebarToggle" onclick="toggleSidebar()" title="設定パネルを開閉">☰</button>
 </body>
 </html>
